@@ -22,4 +22,4 @@ let walk = (dir, done) => {
     })
 }
 
-walk('.', (err, res) => console.log(require('node:util').inspect(res, { depth: null })))
+walk('.', (err, res) => console.log(require('util').inspect(res, { depth: null })))
