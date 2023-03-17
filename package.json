@@ -1,0 +1,11 @@
+{
+  "name": "mastering-nodejs",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/agmyintmyatoo/mastering-nodejs.git",
+  "author": "agmmtoo",
+  "license": "MIT",
+  "dependencies": {
+    "formidable": "^2.1.1"
+  }
+}
