@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello, files</title>
+</head>
+
+<body>
+    <p><input type="button" value="Reload the app after changing the code" onclick="window.location.reload"></p>
+    <div id="app">
+        <p>{{location}}</p>
+        <button @click="up">..</button>
+        <listing v-for="file in files" v-bind:key="file.id" v-bind:item="file"></listing>
+        <p><img src="http://unpkg.com/vue" alt=""></p>
+    </div>
+    <script src="https://unpkg.com/vue"></script>
+    <script>
+        require('./renderer.js')
+    </script>
+</body>
+
+</html>
