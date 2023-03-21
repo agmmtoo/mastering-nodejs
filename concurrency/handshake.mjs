@@ -1,6 +1,6 @@
 import { createClient } from 'redis'
 import crypto from 'node:crypto'
-import { createReadStream } from 'node:fs'
+import { readFile } from 'node:fs/promises'
 import express, { response } from 'express'
 
 const app = express()
@@ -11,22 +11,27 @@ app.get('/authenticate/:username', async (req, res) => {
     const publicKey = Math.random()
     const username = req.params.username
     const userdata = await client.hGetAll(username)
-    if (!Object.keys(userdata).length) return res.status(404)
+    if (!Object.keys(userdata).length) return res.status(404).end()
     const challenge = crypto.createHash('sha256').update(publicKey + userdata.password).digest('hex')
+    console.log('challenge', challenge)
     await client.setEx(challenge, 5, username)
-    res.end(challenge)
+    res.end(publicKey.toString())
 })
 
 app.get('/login/:response', async (req, res) => {
     const challengeHash = req.params.response
+    console.log('ch', challengeHash)
     const exists = await client.exists(challengeHash)
-    if (!exists) res.status(404)
+    console.log(exists)
+    if (!exists) return res.status(404).send('failed')
     await client.del(challengeHash)
-    res.status(200).end('OK')
+    return res.status(200).end('OK')
 })
 
 app.get('/', async (req, res) => {
-    createReadStream('./handshake.html').pipe(res)
+    const html = await readFile('./handshake.html')
+    res.setHeader('Content-Type', 'text/html')
+    res.send(html)
 })
 
 app.use((err, req, res) => req.status(500))
