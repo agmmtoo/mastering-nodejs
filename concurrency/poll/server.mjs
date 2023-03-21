@@ -1,4 +1,5 @@
 import { createReadStream } from 'node:fs'
+import fs from 'node:fs'
 import express from 'express'
 import cookieParser from 'cookie-parser'
 import { createClient } from 'redis'
@@ -24,14 +25,17 @@ app.get('/poll', (req, res) => {
 })
 
 app.get('/', (req, res) => {
-    res.cookie('node_poll_id', Math.random().toString(36).substring(2, 9))
-    res.writeHead(200, { 'Content-Type': 'text/html' })
-    createReadStream('./index.html', { encoding: 'utf-8' }).pipe(res)
+    // createReadStream('./index.html', { encoding: 'utf-8' }).pipe(res)
+    fs.readFile('./index.html', (err, data) => {
+        res.cookie('node_poll_id', Math.random().toString(36).substring(2, 9))
+        res.writeHead(200, { 'Content-Type': 'text/html' })
+        res.end(data)
+    })
 })
 
 app.listen(2112, () => console.log('http://localhost:2112'))
 
-receiver.subscribe('stdin_message')
+await receiver.subscribe('stdin_message', console.log)
 receiver.on('message', (channel, message) => {
     let conn
     for (conn in connections) {
@@ -40,9 +44,10 @@ receiver.on('message', (channel, message) => {
     console.log(`Received message: ${message} on channel: ${channel}`)
 })
 
-process.stdin.on('readable', function () {
+process.stdin.on('readable', async function () {
     let msg = this.read()
     if (msg) {
-        publisher.publish('stdin_message', msg.toString())
+        await publisher.publish('stdin_message', msg.toString())
+        // console.info(msg)
     }
 })
