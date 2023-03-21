@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./sha256.js" type="module"></script>
+</head>
+<body>
+    <script type="module">
+        console.log(Sha256)
+        const res = await fetch('/authenticate/jack')
+        const publicKey = res.text()
+        console.log(publicKey)
+        if (publicKey === 'no data') alert('Can\'t log in.')
+        const response = Sha256.hash(publicKey + 'beanstalk')
+        const res2 = await fetch(`/login${response}`)
+        const verdict = res2.text()
+        console.log(verdict)
+        if (verdict === 'failed') alert('No Dice! Not logged in.')
+        alert('You\'re in!')
+    </script>
+</body>
+</html>
