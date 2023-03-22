@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Files</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <!-- <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script> -->
+</head>
+
+<body>
+    <div id="root"></div>
+    <script type="module">
+        'use strict'
+        const e = React.createElement
+
+        function LikeButton() {
+            const [like, setLike] = React.useState(false)
+            return (
+                e(
+                    'button',
+                    { onClick: () => setLike(like => !like) },
+                    like ? 'Unlike' : 'Like'
+                )
+            )
+        }
+
+        function ServerTime() {
+            const [time, setTime] = React.useState(new Date)
+            React.useEffect(() => {
+                const es = new EventSource('/time')
+                es.onmessage = function (msg) {
+                    console.log(msg.bubbles)
+                    setTime(msg.data)
+                }
+            }, [])
+
+            return (
+                e(
+                    'div',
+                    {},
+                    time?.toString()
+                )
+            )
+        }
+
+        const domContainer = document.querySelector('#root')
+        const root = ReactDOM.createRoot(domContainer)
+        root.render(e(ServerTime))
+    </script>
+</body>
+
+</html>
