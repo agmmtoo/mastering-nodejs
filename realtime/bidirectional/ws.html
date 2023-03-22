@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WS</title>
+</head>
+
+<body>
+    <ul id="messages"></ul>
+    <input type="number" id="input">
+    <button id="square">Square!</button>
+    <script>
+        const conn = new WebSocket('ws://localhost:8081', 'json')
+        conn.onopen = () => conn.send('Hello from the client!')
+        conn.onerror = (err) => show('client', err, 'error')
+        conn.onmessage = (msg) => show('server', msg)
+
+
+        function show(actor = 'client', message, type = 'message') {
+            const li = document.createElement('li')
+            if (type !== 'message') {
+                li.style = 'color: red;'
+                message = JSON.stringify(message)
+            }
+            if (actor !== 'client') li.style = 'color: green;'
+            li.innerHTML = actor + ': ' + message.data
+            document.querySelector('#messages').appendChild(li)
+        }
+
+        document.querySelector('#square').onclick = () => {
+            const num = document.querySelector('#input').value
+            show('client', { data: 'Square the ' + num })
+            conn.send('num: ' + num)
+        }
+    </script>
+</body>
+
+</html>
