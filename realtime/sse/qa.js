@@ -24,7 +24,7 @@ http.createServer((req, res) => {
 
     function broadcast(toId, msg, eventName) {
         if (toId === '*') {
-            return clients.forEach((_, id) => broadcast(p, msg))
+            return clients.forEach((_, id) => broadcast(id, msg))
         }
         const clientSocket = clients.get(toId)
         if (!clientSocket) return
@@ -92,7 +92,7 @@ http.createServer((req, res) => {
         }
         answers.set(curUserQuestion, answers.get(curUserQuestion) || [])
         answers.set(curUserQuestion, [...answers.get(curUserQuestion), parameter])
-        clientQMap.forEach((q, id) => {
+        clientQMap.forEach((_, id) => {
             if (clientQMap.get(id) === curUserQuestion) {
                 broadcast(id, {
                     type: 'answers',
@@ -103,7 +103,19 @@ http.createServer((req, res) => {
         })
         return res.end()
     }
+
+    if (method === 'selectquestion') {
+        if (parameter && questions.has(parameter)) {
+            clientQMap.set(sseUserId, parameter)
+            broadcast(sseUserId, {
+                type: 'answers',
+                question: parameter,
+                answers: answers.get(parameter) || []
+            })
+        }
+        return res.end()
+    }
     if (!method) {
-        return fs.createReadStream('./qa.html').pipe(res)
+        return fs.createReadStream('qa.html', { encoding: 'utf-8' }).pipe(res)
     }
 }).listen(8080, () => console.log('Server running at http://localhost:8080/'))
