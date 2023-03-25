@@ -9,7 +9,7 @@ const admins = new Map()
 admins.set('adminname', {})
 
 const server = http.createServer((req, res) => {
-    const [method, adminId] = url.parse(req.url).pathname.split('/')
+    const [,method, adminId] = url.parse(req.url).pathname.split('/')
 
     if (method === 'favicon.ico') res.end()
 
@@ -31,18 +31,18 @@ const server = http.createServer((req, res) => {
         res.write(`retry: ${2000}\n`)
 
         res.on('close', () => admins.set(adminId, {}))
-        setInterval(() => res.write(`data: ${Date.now()}\n\n`), 15_000)
+        setInterval(() => res.write(`data: PING\n\n`), 15_000)
 
         admins.set(adminId, { socket: res })
         return
     }
 
-    fs.createWriteStream('./client.html').pipe(res)
-}).listen(2112)
+    fs.createReadStream('./client.html').pipe(res)
+}).listen(2112, () => console.log('listening on http://localhost:2112'))
 
 cluster.setupPrimary({
     exec: 'sock-worker.js',
-    silent: 'false',
+    silent: false,
 })
 
 if (cluster.isPrimary) {
@@ -50,18 +50,16 @@ if (cluster.isPrimary) {
 
     cluster
         .on('fork', (w) => `forked ${w.process.id}`)
-        .online('online', (w) => `online ${w.process.id}`)
+        .on('online', (w) => `online ${w.process.id}`)
         .on('listening', (w, addr) => `listening ${w.process.id} on ${addr.address}:${addr.port}`)
         .on('error', (...args) => console.error('error', ...args))
         .on('exit', (w, code, sig) => `exit ${w.process.id} with code ${code} and signal ${sig}`)
         .on('disconnect', (w) => `disconnect ${w.process.id}`)
 
-    console.log(cluster.workers)
-
     Object.keys(cluster.workers).forEach((id) => {
         cluster.workers[id].on('message', (msg) => {
             admins.forEach(({ socket }, adminId) => {
-                socket.write(`data: ${JSON.stringify(msg)}\n\n`)
+                socket?.write(`data: ${JSON.stringify(msg)}\n\n`)
             })
         })
     })
