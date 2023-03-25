@@ -6,6 +6,7 @@
   "author": "agmmtoo",
   "license": "MIT",
   "dependencies": {
+    "amqp": "^0.2.7",
     "cookie-parser": "^1.4.6",
     "express": "^4.18.2",
     "formidable": "^2.1.1",
